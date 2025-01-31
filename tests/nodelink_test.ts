@@ -40,6 +40,26 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "Can record file download",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const wallet_1 = accounts.get("wallet_1")!;
+    
+    let block = chain.mineBlock([
+      Tx.contractCall("nodelink", "register-node", [], wallet_1.address),
+      Tx.contractCall("nodelink", "share-file", 
+        ["test.txt", "0x1234", types.uint(1000)], 
+        wallet_1.address),
+      Tx.contractCall("nodelink", "record-download",
+        [types.uint(0)],
+        wallet_1.address)
+    ]);
+    
+    assertEquals(block.receipts.length, 3);
+    block.receipts[2].result.expectOk();
+  },
+});
+
+Clarinet.test({
   name: "Can update reputation",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const wallet_1 = accounts.get("wallet_1")!;
